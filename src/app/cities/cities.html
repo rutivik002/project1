@@ -1,0 +1,75 @@
+<h2>Cities</h2>
+
+<input
+  type="text"
+  placeholder="Search city..."
+  (input)="onSearch($event.target.value)"
+/>
+
+<button class="btn btn-primary" (click)="openAddPopup()">Add City</button>
+
+<table style:border="1" width="100%">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr *ngFor="let row of rows">
+      <td>{{ row.cityId }}</td>
+      <td>{{ row.name }}</td>
+      <td>
+        <button (click)="openEditPopup(row)">Edit</button>
+        <button (click)="deleteCity(row.cityId)">Delete</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- PAGINATION -->
+<div style="margin-top:10px">
+  <button (click)="prevPage()" [disabled]="pageIndex === 1">
+    Previous
+  </button>
+
+  Page {{ pageIndex }} of {{ totalPages }}
+
+  <button (click)="nextPage()" [disabled]="pageIndex === totalPages">
+    Next
+  </button>
+</div>
+
+<!-- POPUP -->
+<!-- ADD / EDIT POPUP -->
+<!-- CITY POPUP (Same as Department) -->
+<div class="modal fade show d-block" *ngIf="showPopup">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ isEdit ? 'Edit City' : 'Add City' }}
+        </h5>
+        <button class="btn-close" (click)="closePopup()"></button>
+      </div>
+
+      <div class="modal-body">
+        <input
+          type="text"
+          class="form-control"
+          [(ngModel)]="cityName"
+          placeholder="City name"
+        />
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closePopup()">Cancel</button>
+        <button class="btn btn-success" (click)="saveData()">Save</button>
+      </div>
+
+    </div>
+  </div>
+</div>
