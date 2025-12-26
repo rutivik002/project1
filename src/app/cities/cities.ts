@@ -1,40 +1,49 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, FormGroup, Validators, FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { MyService } from '../my-service';
+
 
 @Component({
   selector: 'app-cities',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, ReactiveFormsModule],
   templateUrl: './cities.html',
   styleUrls: ['./cities.scss']
 })
 export class CitiesComponent implements OnInit {
 
-  // TABLE DATA
+
   data: any[] = [];
   rows: any[] = [];
-
-  // PAGINATION
   pageIndex = 1;
   pageSize = 10;
   totalRecords = 0;
-
-  // SEARCH
   searchText = '';
-
-  // CRUD
   showPopup = false;
   isEdit = false;
   editId: number | null = null;
-  cityName = '';
+  cityName : any;
   stateId = 1;
+  sortDirection: 'asc' | 'desc' = 'asc';
+  cityForm: any;
+  submitted = false;
 
-  constructor(private service: MyService) {}
+
+  constructor(private service: MyService, private fb: FormBuilder) { }
 
   ngOnInit() {
+    this.cityForm = this.fb.group({
+      name: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(3),
+          Validators.pattern('^[a-zA-Z ]+$')
+        ]
+      ]
+    });
     this.loadCities();
   }
 
@@ -82,7 +91,8 @@ export class CitiesComponent implements OnInit {
   openAddPopup() {
     this.isEdit = false;
     this.editId = null;
-    this.cityName = '';
+    this.submitted = false;
+    this.cityForm.reset();
     this.showPopup = true;
   }
 
@@ -90,44 +100,54 @@ export class CitiesComponent implements OnInit {
   openEditPopup(row: any) {
     this.isEdit = true;
     this.editId = row.cityId;
-    this.cityName = row.name;
     this.stateId = row.stateId;
+    this.submitted = false;
+    this.cityForm.patchValue({ name: row.name });
     this.showPopup = true;
   }
 
   // ================= SAVE =================
-  saveData() {
-    if (!this.cityName.trim()) return;
+ saveData() {
+  this.submitted = true;
 
-    if (this.isEdit && this.editId !== null) {
-      // UPDATE
-      this.service.updateCity({
-        cityId: this.editId,
-        stateId: this.stateId,
-        name: this.cityName
-      }).subscribe(res => {
-        if (res.success === 1) {
-          this.closePopup();
-          this.loadCities();
-        }
-      });
-
-    } else {
-      // ADD
-      this.service.addCity({
-        stateId: this.stateId,
-        name: this.cityName
-      }).subscribe(res => {
-        if (res.success === 1) {
-          this.closePopup();
-          this.pageIndex = 1;
-          this.loadCities();
-        } else if (res.success === 2) {
-          alert(res.message);
-        }
-      });
-    }
+  if (!this.cityForm) {
+    console.error('cityForm not initialized');
+    return;
   }
+
+  if (this.cityForm.invalid) {
+    this.cityForm.markAllAsTouched();
+    return;
+  }
+
+  const cityName: string = this.cityForm.get('name')!.value.trim();
+
+  if (this.isEdit && this.editId !== null) {
+    this.service.updateCity({
+      cityId: this.editId,
+      stateId: this.stateId,
+      name: cityName
+    }).subscribe((res: any) => {
+      if (res.success === 1) {
+        this.closePopup();
+        this.loadCities();
+      }
+    });
+
+  } else {
+    this.service.addCity({
+      stateId: this.stateId,
+      name: cityName
+    }).subscribe((res: any) => {
+      if (res.success === 1) {
+        this.closePopup();
+        this.pageIndex = 1;
+        this.loadCities();
+      }
+    });
+  }
+}
+
 
   // ================= DELETE =================
   deleteCity(id: number) {
@@ -139,10 +159,18 @@ export class CitiesComponent implements OnInit {
       }
     });
   }
+closePopup() {
+  this.showPopup = false;
+  this.submitted = false;
+  this.cityForm.reset();
+}
 
-  closePopup() {
-    this.showPopup = false;
-    this.cityName = '';
-    this.editId = null;
+  sortByName() {
+    this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    this.rows = [...this.rows].sort((a, b) =>
+      this.sortDirection === 'asc'
+        ? a.name.localeCompare(b.name)
+        : b.name.localeCompare(a.name)
+    );
   }
 }

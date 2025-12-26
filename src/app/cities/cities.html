@@ -1,74 +1,123 @@
-<h2>Cities</h2>
+<button routerLink="/" class="btn btn-link mb-3">⬅ Back</button>
 
-<input
-  type="text"
-  placeholder="Search city..."
-  (input)="onSearch($event.target.value)"
-/>
+<h2>City Details</h2>
 
-<button class="btn btn-primary" (click)="openAddPopup()">Add City</button>
+<div class="container mt-4">
 
-<table style:border="1" width="100%">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Name</th>
-      <th>Action</th>
-    </tr>
-  </thead>
+  <!-- Top bar -->
+  <div class="d-flex justify-content-between mb-3">
+    <button class="btn btn-primary" (click)="openAddPopup()">Add City</button>
 
-  <tbody>
-    <tr *ngFor="let row of rows">
-      <td>{{ row.cityId }}</td>
-      <td>{{ row.name }}</td>
-      <td>
-        <button (click)="openEditPopup(row)">Edit</button>
-        <button (click)="deleteCity(row.cityId)">Delete</button>
-      </td>
-    </tr>
-  </tbody>
-</table>
+    <input type="text" class="form-control w-25" placeholder="Search..." (input)="onSearch($event.target.value)" />
+  </div>
 
-<!-- PAGINATION -->
-<div style="margin-top:10px">
-  <button (click)="prevPage()" [disabled]="pageIndex === 1">
-    Previous
-  </button>
+  <!-- Table -->
+  <table class="table table-bordered text-center">
+    <thead class="table-light">
+      <tr>
+        <th>#</th>
+        <th (click)="sortByName()" style="cursor:pointer">Name</th>
+        <th>Action</th>
+      </tr>
+    </thead>
 
-  Page {{ pageIndex }} of {{ totalPages }}
+    <tbody>
+      <tr *ngFor="let r of rows; let i = index">
+        <td>{{ (pageIndex - 1) * pageSize + i + 1 }}</td>
+        <td>{{ r.name }}</td>
+        <td>
+          <div class="dropdown">
+            <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+              Actions
+            </button>
 
-  <button (click)="nextPage()" [disabled]="pageIndex === totalPages">
-    Next
-  </button>
+            <ul class="dropdown-menu">
+              <li>
+                <button class="dropdown-item" (click)="openEditPopup(r)">
+                  Edit
+                </button>
+              </li>
+              <li>
+                <button class="dropdown-item text-danger" (click)="deleteCity(r.cityId)">
+                  Delete
+                </button>
+              </li>
+            </ul>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p *ngIf="rows.length === 0" class="text-center text-muted">
+    No data found
+  </p>
+
+  <!-- Pagination -->
+  <div class="d-flex justify-content-between align-items-center mt-3">
+    <button class="btn btn-outline-secondary" (click)="prevPage()" [disabled]="pageIndex === 1">
+      ⬅ Previous
+    </button>
+
+    <span>
+      Page {{ pageIndex }} of {{ totalPages }}
+    </span>
+
+    <button class="btn btn-outline-secondary" (click)="nextPage()" [disabled]="pageIndex === totalPages">
+      Next ➡
+    </button>
+  </div>
 </div>
 
-<!-- POPUP -->
-<!-- ADD / EDIT POPUP -->
-<!-- CITY POPUP (Same as Department) -->
+<!-- ===================== POPUP (REACTIVE FORM) ===================== -->
 <div class="modal fade show d-block" *ngIf="showPopup">
   <div class="modal-dialog">
     <div class="modal-content">
 
-      <div class="modal-header">
-        <h5 class="modal-title">
-          {{ isEdit ? 'Edit City' : 'Add City' }}
-        </h5>
-        <button class="btn-close" (click)="closePopup()"></button>
-      </div>
+      <form [formGroup]="cityForm">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            {{ isEdit ? 'Edit City' : 'Add City' }}
+            <span class="text-danger">*</span>
+          </h5>
+          <button type="button" class="btn-close" (click)="closePopup()"></button>
+        </div>
 
-      <div class="modal-body">
-        <input
-          type="text"
-          class="form-control"
-          [(ngModel)]="cityName"
-          placeholder="City name"
-        />
-      </div>
+        <div class="modal-body">
+          <input type="text" class="form-control " [class.is-invalid]=" cityForm.get('name')?.invalid &&  (cityForm.get('name')?.touched || submitted)
+                  " formControlName="name" placeholder="City name" />
 
-      <div class="modal-footer">
-        <button class="btn btn-secondary" (click)="closePopup()">Cancel</button>
-        <button class="btn btn-success" (click)="saveData()">Save</button>
-      </div>
+          <!-- Validation messages -->
+          <div class="text-danger mt-1" *ngIf="cityForm.get('name')?.touched ">
+
+
+
+            <small *ngIf="cityForm.get('name')?.errors?.['minlength']">
+              Minimum 3 characters required
+            </small>
+
+            <small *ngIf="cityForm.get('name')?.errors?.['pattern']">
+              Only alphabets allowed
+            </small>
+
+          </div>
+          <div class="text-danger mt-1" *ngIf="submitted && cityForm.get('name')?.invalid">
+            Please add city
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closePopup()">
+            Cancel
+          </button>
+
+          <button type="button" class="btn btn-success" (click)="saveData()">
+            Save
+          </button>
+
+        </div>
+      </form>
 
     </div>
   </div>

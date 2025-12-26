@@ -1,67 +1,113 @@
-<button routerLink="/">⬅ Back</button>
+<button routerLink="/" class="btn btn-link mb-3">⬅ Back</button>
 
-<h2>Department Details</h2>
-
-<!-- Your existing department CRUD HTML here -->
+<h2 class="mb-3">
+  Department Details <span class="text-danger">*</span>
+</h2>
 
 <div class="container mt-4">
 
+  <!-- TOP BAR -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <button class="btn btn-primary" (click)="openAddPopup()">
+      Add Department
+    </button>
 
-  <div class="d-flex justify-content-between mb-3">
-    <button class="btn btn-primary" (click)="openAddPopup()">Add Department</button>
-    <input type="text" class="form-control w-25" placeholder="Search..." (input)="onSearch($event.target.value)"
-      (click)="sortByName()" style="cursor:pointer">
+    <input type="text" class="form-control w-25" placeholder="Search..." (input)="onSearch($event.target.value)">
   </div>
 
-
+  <!-- TABLE -->
   <table class="table table-bordered text-center">
-    <thead>
+    <thead class="table-light">
       <tr>
         <th>#</th>
-        <th (click)="sortByName()" style="cursor:pointer">Name</th>
+        <th (click)="sortByName()" style="cursor:pointer">
+          Name ⬍
+        </th>
         <th>Action</th>
       </tr>
     </thead>
+
     <tbody>
-      <tr *ngFor="let r of rows ; let i = index">
+      <tr *ngFor="let r of rows; let i = index">
         <td>{{ i + 1 }}</td>
         <td>{{ r.name }}</td>
         <td>
-          <div class="dropdown">
-            <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-              Actions
-            </button>
-            <ul class="dropdown-menu">
-              <li>
-                <button class="dropdown-item" (click)="openEditPopup(r)">Edit</button>
-              </li>
-              <li>
-                <button class="dropdown-item text-danger" (click)="deleteDepartment(r.id)">Delete</button>
-              </li>
-            </ul>
-          </div>
+          <button class="btn btn-sm btn-warning me-2" (click)="openEditPopup(r)">
+            Edit
+          </button>
+
+          <button class="btn btn-sm btn-danger" (click)="deleteDepartment(r.id)">
+            Delete
+          </button>
         </td>
       </tr>
     </tbody>
   </table>
 
-  <p *ngIf="data.length === 0" class="text-center text-muted">No data found</p>
+  <!-- NO DATA -->
+  <p *ngIf="rows.length === 0" class="text-center text-muted">
+    No data found
+  </p>
 </div>
 
+<!-- ================= MODAL ================= -->
 <div class="modal fade show d-block" *ngIf="showPopup">
   <div class="modal-dialog">
     <div class="modal-content">
+
+      <!-- HEADER -->
       <div class="modal-header">
-        <h5 class="modal-title">{{ isEdit ? 'Edit Department' : 'Add Department' }}</h5>
+        <h5 class="modal-title">
+          {{ isEdit ? 'Edit Department' : 'Add Department' }}
+        </h5>
         <button class="btn-close" (click)="closePopup()"></button>
       </div>
-      <div class="modal-body">
-        <input type="text" class="form-control" [(ngModel)]="deptName" placeholder="Department name">
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" (click)="closePopup()">Cancel</button>
-        <button class="btn btn-success" (click)="saveData()">Save</button>
-      </div>
+
+      <!-- BODY -->
+      <form [formGroup]="departmentForm">
+        <div class="modal-body">
+
+          <label class="form-label">
+            Department Name <span class="text-danger">*</span>
+          </label>
+
+          <input type="text" class="form-control" formControlName="name" placeholder="Enter Department"
+            [class.is-invalid]="departmentForm.get('name')?.invalid &&
+                      departmentForm.get('name')?.touched" />
+
+
+          <!-- VALIDATION ERRORS -->
+          <small class="text-danger" *ngIf="departmentForm.get('name')?.invalid &&
+         departmentForm.get('name')?.touched">
+            Department name is required
+          </small>
+
+
+          <small class="text-danger" *ngIf="departmentForm.get('name')?.touched &&
+                   departmentForm.get('name')?.hasError('minlength')">
+            Minimum 3 characters required
+          </small>
+
+          <small class="text-danger" *ngIf="departmentForm.get('name')?.touched &&
+                   departmentForm.get('name')?.hasError('pattern')">
+            Only alphabets allowed
+          </small>
+
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closePopup()">
+            Cancel
+          </button>
+
+          <button type="button" class="btn btn-success" (click)="saveData()" [disabled]="departmentForm.invalid">
+            Save
+          </button>
+        </div>
+      </form>
+
     </div>
   </div>
 </div>
