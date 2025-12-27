@@ -2,6 +2,10 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+import { Department } from './models/department.model';
+import { City } from './models/city.model';
+import { ApiResponse } from './models/api-responce.model';
+
 @Injectable({
   providedIn: 'root',
 }) export class MyService {
@@ -27,79 +31,90 @@ import { Observable } from 'rxjs';
     });
   }
 
-
-
-
-
-
   // ✅ GET DATA (headers added)
-  getData(): Observable<any> {
-    return this.http.get<any>(this.getApiUrl, {
+   getData(): Observable<ApiResponse<Department[]>> {
+    return this.http.get<ApiResponse<Department[]>>(this.getApiUrl, {
       headers: this.getHeaders()
     });
   }
   // ✅ ADD DATA (headers added)
-  addData(payload: { name: string }): Observable<any> {
-    return this.http.post<any>(this.addApiUrl, payload, {
+  addData(payload: { name: string }): Observable<ApiResponse<null>> {
+    return this.http.post<ApiResponse<null>>(this.addApiUrl, payload, {
       headers: this.getHeaders()
     });
   }
 
-  updateData(payload: { id: number; name: string }): Observable<any> {
-    return this.http.post<any>(
-      this.updateApiUrl,
-      payload,
-      {
-        headers: this.getHeaders()
-      }
+   updateData(payload: { id: number; name: string }): Observable<ApiResponse<null>> {
+    return this.http.post<ApiResponse<null>>(this.updateApiUrl, payload, {
+      headers: this.getHeaders()
+    });
+  }
+
+  deleteData(id: number): Observable<ApiResponse<null>> {
+    return this.http.post<ApiResponse<null>>(
+      this.deleteApiUrl,
+      { id },
+      { headers: this.getHeaders() }
     );
   }
 
-  deleteData(id: number): Observable<any> {
-    return this.http.post<any>(`${this.deleteApiUrl}`, { id: id }, {
-      headers: this.getHeaders(),
-      observe: 'response',
-
-    });
-  }
 
 
 
   // GET LIST
-getCities(searchText = '', pageIndex = 1, pageSize = 10): Observable<any> {
-  const url = `${this.baseUrl}/getList?searchText=${searchText}`;
-  return this.http.get(url, {
-    headers : ({
-      'userid': '1',
-      'pageIndex': pageIndex.toString(),
-      'pageSize': pageSize.toString()
-    })
-  });
+ getCities(
+    searchText = '',
+    pageIndex = 1,
+    pageSize = 10
+  ): Observable<ApiResponse<City[]>> {
+
+    const url = `${this.baseUrl}/getList?searchText=${searchText}`;
+
+    return this.http.get<ApiResponse<City[]>>(url, {
+      headers: {
+        'userid': '1',
+        'pageIndex': pageIndex.toString(),
+        'pageSize': pageSize.toString()
+      }
+    });
+  }
+
+
+  getCity(id: number): Observable<ApiResponse<City>> {
+    return this.http.get<ApiResponse<City>>(
+      `${this.baseUrl}/get/${id}`,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  addCity(data: { stateId: number; name: string }): Observable<ApiResponse<null>> {
+    return this.http.post<ApiResponse<null>>(
+      `${this.baseUrl}/add`,
+      data,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  updateCity(data: { cityId: number; stateId: number; name: string }): Observable<ApiResponse<null>> {
+    return this.http.post<ApiResponse<null>>(
+      `${this.baseUrl}/modify`,
+      data,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  deleteCity(cityId: number): Observable<ApiResponse<null>> {
+    return this.http.post<ApiResponse<null>>(
+      `${this.baseUrl}/remove`,
+      { cityId },
+      { headers: this.getHeaders() }
+    );
+  }
 }
 
-  // GET BY ID
-  getCity(id: number): Observable<any> {
-    return this.http.get(`${this.baseUrl}/get/${id}`, { headers: this.getHeaders() });
-  }
-
-  // ADD
-  addCity(data: { stateId: number; name: string }): Observable<any> {
-    return this.http.post(`${this.baseUrl}/add`, data, { headers: this.getHeaders() });
-  }
-
-  // UPDATE
-  updateCity(data: { cityId: number; stateId: number; name: string }): Observable<any> {
-    return this.http.post(`${this.baseUrl}/modify`, data, { headers: this.getHeaders() });
-  }
-
-  // DELETE
-  deleteCity(cityId: number): Observable<any> {
-    return this.http.post(`${this.baseUrl}/remove`, { cityId }, { headers: this.getHeaders() });
-  }
 
 
 
-}
 
 
 

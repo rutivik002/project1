@@ -1,4 +1,12 @@
 <button routerLink="/" class="btn btn-link mb-3">⬅ Back</button>
+<div
+  *ngIf="showSuccess"
+  class="alert alert-success alert-dismissible fade show"
+  role="alert"
+>
+  {{ successMessage }}
+</div>
+
 
 <h2 class="mb-3">
   Department Details <span class="text-danger">*</span>
@@ -32,14 +40,28 @@
         <td>{{ i + 1 }}</td>
         <td>{{ r.name }}</td>
         <td>
-          <button class="btn btn-sm btn-warning me-2" (click)="openEditPopup(r)">
-            Edit
-          </button>
+          <div class="dropdown">
+            <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+              aria-expanded="false">
+              Action
+            </button>
 
-          <button class="btn btn-sm btn-danger" (click)="deleteDepartment(r.id)">
-            Delete
-          </button>
+            <ul class="dropdown-menu">
+              <li>
+                <button class="dropdown-item" (click)="openEditPopup(r)">
+                  ✏️ Edit
+                </button>
+              </li>
+
+              <li>
+                <button class="dropdown-item text-danger" (click)="deleteDepartment(r.id)">
+                  🗑️ Delete
+                </button>
+              </li>
+            </ul>
+          </div>
         </td>
+
       </tr>
     </tbody>
   </table>
@@ -65,49 +87,42 @@
 
       <!-- BODY -->
       <form [formGroup]="departmentForm">
+
         <div class="modal-body">
+          <input type="text" class="form-control " [class.is-invalid]=" departmentForm.get('name')?.invalid &&  (departmentForm.get('name')?.touched || submitted)
+                  " formControlName="name" placeholder="Enter Department Name" />
 
-          <label class="form-label">
-            Department Name <span class="text-danger">*</span>
-          </label>
-
-          <input type="text" class="form-control" formControlName="name" placeholder="Enter Department"
-            [class.is-invalid]="departmentForm.get('name')?.invalid &&
-                      departmentForm.get('name')?.touched" />
+          <!-- Validation messages -->
+          <div class="text-danger mt-1" *ngIf="departmentForm.get('name')?.touched ">
 
 
-          <!-- VALIDATION ERRORS -->
-          <small class="text-danger" *ngIf="departmentForm.get('name')?.invalid &&
-         departmentForm.get('name')?.touched">
-            Department name is required!
-          </small>
 
+            <small *ngIf="departmentForm.get('name')?.errors?.['minlength']">
+              Minimum 3 characters required
+            </small>
 
-          <small class="text-danger" *ngIf="departmentForm.get('name')?.touched &&
-                   departmentForm.get('name')?.hasError('minlength')">
-            Minimum 3 characters required
-          </small>
+            <small *ngIf="departmentForm.get('name')?.errors?.['pattern']">
+              Only alphabets allowed
+            </small>
 
-          <small class="text-danger" *ngIf="departmentForm.get('name')?.touched &&
-                   departmentForm.get('name')?.hasError('pattern')">
-            Only alphabets allowed
-          </small>
-
+          </div>
+          <div class="text-danger mt-1" *ngIf="submitted && departmentForm.get('name')?.invalid">
+            Please add Department
+          </div>
 
         </div>
 
-        <!-- FOOTER -->
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" (click)="closePopup()">
             Cancel
           </button>
 
-          <button type="button" class="btn btn-success" (click)="saveData()" [disabled]="departmentForm.invalid">
+          <button type="button" class="btn btn-success" (click)="saveData()">
             Save
           </button>
+
         </div>
       </form>
-
     </div>
   </div>
 </div>

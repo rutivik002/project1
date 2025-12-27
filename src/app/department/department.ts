@@ -5,51 +5,64 @@ import { RouterModule } from '@angular/router';
 import { FormsModule, FormGroup, Validators, FormBuilder, ReactiveFormsModule, Form } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { MyService } from '../my-service';
+import { isPlatformBrowser } from '@angular/common';
+import { ChangeDetectorRef } from '@angular/core';
+import { Department } from '../models/department.model';
 
 @Component({
   selector: 'app-department',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule,ReactiveFormsModule, HttpClientModule],
+  imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule, HttpClientModule],
   templateUrl: './department.html',
   styleUrls: ['./department.scss']
 })
 export class DepartmentComponent implements OnInit {
 
+  rows: Department[] = [];
   data: any[] = [];
-  rows: any[] = [];
   showPopup = false;
   isEdit = false;
   editId: number | null = null;
   deptName = '';
   sortDirection: 'asc' | 'desc' = 'asc';
-   departmentForm!: FormGroup;
+  departmentForm!: FormGroup;
+  submitted: any;
+  successMessage = '';
+  showSuccess = false;
 
   constructor(
-    private myService: MyService,@Inject(PLATFORM_ID) private platformId: Object, private fb: FormBuilder  ) { }
+    private myService: MyService, @Inject(PLATFORM_ID) private platformId: Object, private fb: FormBuilder, private cdr: ChangeDetectorRef) { }
 
   ngOnInit() {
-     this.departmentForm = this.fb.group({
+    this.departmentForm = this.fb.group({
       name: [
         '',
         [
           Validators.required,
-          Validators.minLength(3),
+          Validators.minLength(2),
           Validators.pattern('^[a-zA-Z ]+$')
         ]
       ]
     });
-     console.log('DepartmentComponent initialized');
-    this.loadData()
+    if (isPlatformBrowser(this.platformId)) {
+      this.loadData();
+    }
+
   }
- loadData() {
+  loadData(): void {
     this.myService.getData().subscribe({
       next: (res: any) => {
-        this.data = res?.data?.data ?? [];
-        this.rows = [...this.data];
+        // ✅ CORRECT MAPPING
+        if (res?.success === 1) {
+          this.data = res.data;       // 🔥 MAIN FIX
+          this.rows = [...this.data];
+
+        }
+
+        // ✅ FORCE UI UPDATE (SSR + Standalone)
+        this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error('Failed to load departments:', err);
-      }
+      error: err => console.error('API ERROR', err)
     });
   }
   onSearch(value: string) {
@@ -58,27 +71,30 @@ export class DepartmentComponent implements OnInit {
   }
 
   openAddPopup() {
+    this.submitted = false;
     this.isEdit = false;
     this.editId = null;
     this.deptName = '';
     this.showPopup = true;
-     this.departmentForm.reset();
+    this.departmentForm.reset();
   }
 
   openEditPopup(row: any) {
     this.isEdit = true;
+    this.submitted = false;
     this.editId = row.id;
     this.deptName = row.name;
     this.showPopup = true;
-     this.departmentForm.patchValue({
+    this.departmentForm.patchValue({
       name: row.name
     });
   }
 
-  saveData() {
+  saveData(): void {
+    this.submitted = true;
+
     if (this.departmentForm.invalid) {
-      this.departmentForm.markAllAsTouched();
-      return;
+      return; // ❌ stop here, show ONE error
     }
 
     const name = this.departmentForm.value.name;
@@ -86,11 +102,12 @@ export class DepartmentComponent implements OnInit {
     if (this.isEdit && this.editId !== null) {
       const id = this.editId;
 
-      this.myService.updateData({ id, name }).subscribe((res: any) => {
+      this.myService.updateData({ id: this.editId, name }).subscribe((res: any) => {
         if (res.success === 1) {
           const index = this.data.findIndex(d => d.id === id);
           if (index !== -1) this.data[index].name = name;
           this.rows = [...this.data];
+          this.showSuccessMessage('Department Edit successfully!');
           this.closePopup();
         }
       });
@@ -101,6 +118,7 @@ export class DepartmentComponent implements OnInit {
           this.data.push({ id: res.id, name });
           this.rows = [...this.data];
           this.closePopup();
+           this.showSuccessMessage('Department Added successfully!');
         }
       });
     }
@@ -112,13 +130,15 @@ export class DepartmentComponent implements OnInit {
         this.data = this.data.filter(d => d.id !== id);
         this.rows = [...this.data];
       }
+           this.showSuccessMessage('Department delete successfully!');
+           this.loadData();
     });
   }
   closePopup() {
     this.showPopup = false;
     this.deptName = '';
     this.editId = null;
-       this.departmentForm.reset();
+    this.departmentForm.reset();
   }
   sortByName() {
     this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
@@ -127,5 +147,15 @@ export class DepartmentComponent implements OnInit {
         ? a.name.localeCompare(b.name)
         : b.name.localeCompare(a.name)
     );
+  }
+
+  private showSuccessMessage(message: string) {
+    this.successMessage = message;
+    this.showSuccess = true;
+
+    setTimeout(() => {
+      this.showSuccess = false;
+      this.successMessage = '';
+    }, 3000); // auto-hide after 3 sec
   }
 }
