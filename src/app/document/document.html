@@ -1,0 +1,87 @@
+<button class="btn btn-link mb-3" (click)="goBack()">⬅ Back</button>
+
+<div *ngIf="showSuccess" class="alert alert-success alert-dismissible fade show" role="alert">
+  {{ successMessage }}
+</div>
+<div class="container">
+
+  <h2 class="mb-3">
+    Document List <span class="text-danger">*</span>
+  </h2>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <button class="btn btn-primary" (click)="openAddPopup()">
+      + Add Document
+    </button>
+  </div>
+
+
+  <!-- DOCUMENT LIST -->
+  <table class="table table-bordered text-center">
+    <thead>
+      <tr>
+        <th style="width:80px">#</th>
+        <th>Document Name</th>
+        <th style="width:150px">Action</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let doc of documentList; let i = index">
+        <td>{{ i + 1 }}</td>
+        <td>{{ doc.remark || doc.fileName }}</td>
+        <td>
+          <div class="dropdown">
+            <button class="btn  btn-secondary dropdown-toggle" data-bs-toggle="dropdown">
+              Action
+            </button>
+            <ul class="dropdown-menu">
+              <li>
+                <button class="dropdown-item" (click)="viewDocument(doc)"> View</button>
+              </li>
+              <li>
+                <button class="dropdown-item" (click)="downloadDocument(doc)">Download</button>
+              </li>
+            </ul>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<!-- ADD DOCUMENT POPUP -->
+<div class="modal-backdrop" *ngIf="showAddPopup"></div>
+
+<div class="modal" *ngIf="showAddPopup">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5>Add Document</h5>
+        <button class="btn-close" (click)="closeAddPopup()"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="mb-3">
+          <label>Remark</label>
+          <textarea class="form-control" [(ngModel)]="documentForm.remark" placeholder="Enter remark (optional)"></textarea>
+        </div>
+
+
+        <div class="mb-3">
+          <label>Select File *</label>
+          <input type="file" class="form-control" (change)="onFileSelected($event)">
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeAddPopup()">Cancel</button>
+        <button class="btn btn-success" (click)="saveDocument()">Save</button>
+      </div>
+
+    </div>
+  </div>
+</div>

@@ -1,18 +1,19 @@
 // department.component.ts
 import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { FormsModule, FormGroup, Validators, FormBuilder, ReactiveFormsModule, Form } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { MyService } from '../my-service';
 import { isPlatformBrowser } from '@angular/common';
 import { ChangeDetectorRef } from '@angular/core';
 import { Department } from '../models/department.model';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-department',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, HttpClientModule],
   templateUrl: './department.html',
   styleUrls: ['./department.scss']
 })
@@ -31,7 +32,7 @@ export class DepartmentComponent implements OnInit {
   showSuccess = false;
 
   constructor(
-    private myService: MyService, @Inject(PLATFORM_ID) private platformId: Object, private fb: FormBuilder, private cdr: ChangeDetectorRef) { }
+    private myService: MyService, @Inject(PLATFORM_ID) private platformId: Object,  private location: Location, private router: Router,private fb: FormBuilder, private cdr: ChangeDetectorRef) { }
 
   ngOnInit() {
     this.departmentForm = this.fb.group({
@@ -158,4 +159,13 @@ export class DepartmentComponent implements OnInit {
       this.successMessage = '';
     }, 3000); // auto-hide after 3 sec
   }
+
+  goBack() {
+  if (window.history.length > 1) {
+    this.location.back();
+  } else {
+    // optional fallback
+    this.router.navigate (['/home']);
+  }
+}
 }

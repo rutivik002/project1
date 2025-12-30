@@ -1,3 +1,4 @@
+import { Component } from '@angular/core';
 
 import { provideRouter, RouterModule,  } from '@angular/router';
 import { Routes } from '@angular/router';
@@ -6,12 +7,14 @@ import { provideHttpClient, withFetch } from '@angular/common/http';
 import { CitiesComponent } from './cities/cities';
 import { DepartmentComponent } from './department/department';
 import { HomeComponent } from './homepage/homepage';
+import { DocumentComponent } from './document/document';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },   // 👈 Main Page
   { path: 'department', component: DepartmentComponent },
   { path: 'cities', component: CitiesComponent },
-  { path: '**', redirectTo: '' }  // fallback
+  { path: 'document', component: DocumentComponent},
+  { path: '**', redirectTo: '/' }  // fallback
 ];
 
 bootstrapApplication(HomeComponent, {

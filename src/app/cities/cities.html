@@ -1,4 +1,10 @@
-<button routerLink="/" class="btn btn-link mb-3">⬅ Back</button>
+<button class="btn btn-link mb-3" (click)="goBack()">⬅ Back</button>
+
+
+<div *ngIf="showSuccess" class="alert alert-success text-center">
+  {{ successMessage }}
+</div>
+
 
 <h2>City Details</h2>
 
@@ -27,19 +33,19 @@
         <td>{{ r.name }}</td>
         <td>
           <div class="dropdown">
-            <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <button  class="btn  btn-secondary dropdown-toggle" data-bs-toggle="dropdown"  >
               Actions
             </button>
 
             <ul class="dropdown-menu">
               <li>
-                <button class="dropdown-item" (click)="openEditPopup(r)">
-                  Edit
+                <button class="dropdown-item"  (click)="openEditPopup(r)">
+                ✏️ Edit
                 </button>
               </li>
               <li>
                 <button class="dropdown-item text-danger" (click)="deleteCity(r.cityId)">
-                  Delete
+                   🗑️ Delete
                 </button>
               </li>
             </ul>

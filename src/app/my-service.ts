@@ -17,10 +17,13 @@ import { ApiResponse } from './models/api-responce.model';
 
   private baseUrl = 'http://192.168.10.248:81/api/city';
 
+  private documentbaseUrl = 'http://192.168.10.248:81/api/commonDocument';
+
 
 
 
   constructor(private http: HttpClient) { }
+
 
   // ✅ Common headers
   private getHeaders(): HttpHeaders {
@@ -31,8 +34,16 @@ import { ApiResponse } from './models/api-responce.model';
     });
   }
 
+  // getdocumnet():Observable<ApiResponse<Document[]>> {
+  //  return this.http.get<ApiResponse<Document[]>>(this.documentbaseUrl, {
+
+  //   headers: this.getHeaders()
+  //  });
+  // }
+
+
   // ✅ GET DATA (headers added)
-   getData(): Observable<ApiResponse<Department[]>> {
+  getData(): Observable<ApiResponse<Department[]>> {
     return this.http.get<ApiResponse<Department[]>>(this.getApiUrl, {
       headers: this.getHeaders()
     });
@@ -44,7 +55,7 @@ import { ApiResponse } from './models/api-responce.model';
     });
   }
 
-   updateData(payload: { id: number; name: string }): Observable<ApiResponse<null>> {
+  updateData(payload: { id: number; name: string }): Observable<ApiResponse<null>> {
     return this.http.post<ApiResponse<null>>(this.updateApiUrl, payload, {
       headers: this.getHeaders()
     });
@@ -62,7 +73,7 @@ import { ApiResponse } from './models/api-responce.model';
 
 
   // GET LIST
- getCities(
+  getCities(
     searchText = '',
     pageIndex = 1,
     pageSize = 10
@@ -110,6 +121,96 @@ import { ApiResponse } from './models/api-responce.model';
       { headers: this.getHeaders() }
     );
   }
+
+
+
+
+  // ================= DOCUMENT APIs =================
+
+  // 1️⃣ ADD CUSTOMER OTHER DOCUMENT (File Upload)
+  addCustomerOtherDocument(
+    data: {
+      portfolioTypeId: number;
+      clientId: number;
+      trackingNumber: string;
+      remark?: string;
+    },
+    file: File
+  ): Observable<any> {
+
+    const payload = {
+      ...data,
+      remark: data.remark ?? ''   // ✅ ALWAYS SEND
+    };
+
+    const formData = new FormData();
+    formData.append('objJsonStr', JSON.stringify(payload));
+    formData.append('file', file);
+
+    // ✅ Correct headers
+    const headers = new HttpHeaders({
+      'userid': '1',
+      'entryBy': '20028-Amaratbhai'
+      // ❌ DO NOT set Content-Type
+    });
+
+    return this.http.post(
+      `${this.documentbaseUrl}/addCustomerOtherDocument`,
+      formData,
+      { headers } // ✅ Use correct headers
+    );
+  }
+
+
+
+  // 2️⃣ GET CUSTOMER DOCUMENT LIST
+  getCustomerDocumentList(payload: {
+    portfolioTypeId: number;
+    clientId: number;
+    trackingNo: string;
+  }): Observable<any> {
+
+    return this.http.post(
+      `${this.documentbaseUrl}/getCustomerDocumentList`,
+      payload,
+      {
+        headers: new HttpHeaders({
+          'userid': '1',
+          'Content-Type': 'application/json',
+          'Accept': '*/*'
+        })
+      }
+    );
+  }
+
+
+  // 3️⃣ GET CUSTOMER DOCUMENT BY ID
+  getCustomerDocumentById(id: number): Observable<any> {
+
+    return this.http.get(
+      `${this.documentbaseUrl}/getCustomerDocument?id=${id}`,
+      {
+        headers: new HttpHeaders({
+          'userid': '1',
+          'Accept': '*/*'
+        })
+      }
+    );
+  }
+
+  viewCustomerDocument(id: number) {
+    return this.http.get(
+      `http://192.168.10.248:81/api/commonDocument/getCustomerDocument?id=${id}`,
+      { responseType: 'blob' } // important!
+    );
+  }
+
+
+
+
+
+
+
 }
 
 
