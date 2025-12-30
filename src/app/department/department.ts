@@ -1,4 +1,3 @@
-// department.component.ts
 import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
@@ -9,15 +8,19 @@ import { isPlatformBrowser } from '@angular/common';
 import { ChangeDetectorRef } from '@angular/core';
 import { Department } from '../models/department.model';
 import { Location } from '@angular/common';
+import { MessageComponent } from './../shared/message/message.component';
+import { MessageService } from '../shared/message.service';
+
 
 @Component({
   selector: 'app-department',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, HttpClientModule,    MessageComponent],
   templateUrl: './department.html',
   styleUrls: ['./department.scss']
 })
 export class DepartmentComponent implements OnInit {
+  [x: string]: any;
 
   rows: Department[] = [];
   data: any[] = [];
@@ -28,11 +31,10 @@ export class DepartmentComponent implements OnInit {
   sortDirection: 'asc' | 'desc' = 'asc';
   departmentForm!: FormGroup;
   submitted: any;
-  successMessage = '';
-  showSuccess = false;
+ 
 
   constructor(
-    private myService: MyService, @Inject(PLATFORM_ID) private platformId: Object,  private location: Location, private router: Router,private fb: FormBuilder, private cdr: ChangeDetectorRef) { }
+    private myService: MyService, @Inject(PLATFORM_ID) private platformId: Object,  private location: Location, private router: Router,private fb: FormBuilder, private cdr: ChangeDetectorRef,private messageService: MessageService,) { }
 
   ngOnInit() {
     this.departmentForm = this.fb.group({
@@ -108,7 +110,7 @@ export class DepartmentComponent implements OnInit {
           const index = this.data.findIndex(d => d.id === id);
           if (index !== -1) this.data[index].name = name;
           this.rows = [...this.data];
-          this.showSuccessMessage('Department Edit successfully!');
+          this.messageService.show('Department Edit successfully!');
           this.closePopup();
         }
       });
@@ -119,7 +121,7 @@ export class DepartmentComponent implements OnInit {
           this.data.push({ id: res.id, name });
           this.rows = [...this.data];
           this.closePopup();
-           this.showSuccessMessage('Department Added successfully!');
+          this.messageService.show('Added successfully');
         }
       });
     }
@@ -131,7 +133,7 @@ export class DepartmentComponent implements OnInit {
         this.data = this.data.filter(d => d.id !== id);
         this.rows = [...this.data];
       }
-           this.showSuccessMessage('Department delete successfully!');
+           this.messageService.show('Department delete successfully!');
            this.loadData();
     });
   }
@@ -150,15 +152,6 @@ export class DepartmentComponent implements OnInit {
     );
   }
 
-  private showSuccessMessage(message: string) {
-    this.successMessage = message;
-    this.showSuccess = true;
-
-    setTimeout(() => {
-      this.showSuccess = false;
-      this.successMessage = '';
-    }, 3000); // auto-hide after 3 sec
-  }
 
   goBack() {
   if (window.history.length > 1) {

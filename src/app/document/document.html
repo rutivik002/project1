@@ -1,22 +1,20 @@
 <button class="btn btn-link mb-3" (click)="goBack()">⬅ Back</button>
 
-<div *ngIf="showSuccess" class="alert alert-success alert-dismissible fade show" role="alert">
-  {{ successMessage }}
-</div>
-<div class="container">
+
+<div class="container mt-4">
 
   <h2 class="mb-3">
     Document List <span class="text-danger">*</span>
   </h2>
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <button class="btn btn-primary" (click)="openAddPopup()">
+    <button class="btn  btn-outline-info " (click)="openAddPopup()" >
       + Add Document
     </button>
   </div>
 
 
   <!-- DOCUMENT LIST -->
-  <table class="table table-bordered text-center">
+  <table class="table table-bordered table-hover table-primary text-center table-striped">
     <thead>
       <tr>
         <th style="width:80px">#</th>
@@ -28,7 +26,7 @@
     <tbody>
       <tr *ngFor="let doc of documentList; let i = index">
         <td>{{ i + 1 }}</td>
-        <td>{{ doc.remark || doc.fileName }}</td>
+       <td>{{ doc.remark?.trim() ? doc.remark : doc.fileName }}</td>
         <td>
           <div class="dropdown">
             <button class="btn  btn-secondary dropdown-toggle" data-bs-toggle="dropdown">

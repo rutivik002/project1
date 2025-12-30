@@ -4,12 +4,13 @@ import { FormsModule, FormGroup, Validators, FormBuilder, ReactiveFormsModule } 
 import { Router } from '@angular/router';
 import { MyService } from '../my-service';
 import { ChangeDetectorRef } from '@angular/core';
-
+import { MessageService } from '../shared/message.service';
+import { MessageComponent } from '../shared/message/message.component';
 
 @Component({
   selector: 'app-cities',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule,MessageComponent],
   templateUrl: './cities.html',
   styleUrls: ['./cities.scss']
 })
@@ -35,7 +36,7 @@ export class CitiesComponent implements OnInit {
   submitted = false;
 
 
-  constructor(private service: MyService, private fb: FormBuilder,@Inject(PLATFORM_ID) private platformId: Object,private cdr: ChangeDetectorRef, private Router: Router, private Location: Location) { }
+  constructor(private service: MyService, private fb: FormBuilder,@Inject(PLATFORM_ID) private platformId: Object,private cdr: ChangeDetectorRef, private Router: Router, private Location: Location, private messageService: MessageService) { }
 
   ngOnInit() {
     this.cityForm = this.fb.group({
@@ -129,7 +130,7 @@ export class CitiesComponent implements OnInit {
         name: cityName
       }).subscribe((res: any) => {
         if (res.success === 1) {
-          this.showSuccessMessage('City updated successfully');
+          this.messageService.show('City updated successfully');
           this.closePopup();
           this.loadCities();
         }
@@ -141,7 +142,7 @@ export class CitiesComponent implements OnInit {
         name: cityName
       }).subscribe((res: any) => {
         if (res.success === 1) {
-          this.showSuccessMessage('City added successfully');
+          this.messageService.show('City added successfully');
           this.closePopup();
           this.pageIndex = 1;
           this.loadCities();
@@ -158,7 +159,7 @@ export class CitiesComponent implements OnInit {
 
     this.service.deleteCity(id).subscribe(res => {
       if (res.success === 1) {
-          this.showSuccessMessage('City deleted successfully');
+          this.messageService.show('City deleted successfully');
         this.loadCities();
       }
     });
@@ -185,7 +186,7 @@ export class CitiesComponent implements OnInit {
   setTimeout(() => {
     this.showSuccess = false;
     this.successMessage = '';
-  }, 3000); // Hide after 3 seconds
+  }, 2000); // Hide after 3 seconds
 }
 
 goBack() {

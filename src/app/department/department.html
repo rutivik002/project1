@@ -1,13 +1,5 @@
+
 <button class="btn btn-link mb-3" (click)="goBack()">⬅ Back</button>
-
-<div
-  *ngIf="showSuccess"
-  class="alert alert-success alert-dismissible fade show"
-  role="alert"
->
-  {{ successMessage }}
-</div>
-
 
 <h2 class="mb-3">
   Department Details <span class="text-danger">*</span>
@@ -16,8 +8,8 @@
 <div class="container mt-4">
 
   <!-- TOP BAR -->
-  <div  >
-    <button class="btn btn-primary" (click)="openAddPopup()">
+  <div  class="d-flex justify-content-between mb-3">
+    <button class="btn btn btn-outline-info" (click)="openAddPopup()">
       Add Department
     </button>
 
@@ -25,7 +17,7 @@
   </div>
 
   <!-- TABLE -->
-  <table class="table table-bordered text-center">
+  <table class="table table-bordered table-primary table-hover text-center table-striped">
     <thead class="table-light">
       <tr>
         <th>#</th>

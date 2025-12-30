@@ -1,3 +1,4 @@
+import { MessageService } from './../shared/message.service';
 import { Component, OnInit, Inject, PLATFORM_ID, } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -5,31 +6,30 @@ import { MyService } from '../my-service';
 import { Router } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
 import { Location } from '@angular/common';
+import { MessageComponent } from '../shared/message/message.component';
 
 @Component({
   selector: 'app-document',
   standalone: true,
-  imports: [CommonModule, FormsModule, ],
+  imports: [CommonModule, FormsModule,MessageComponent],
   templateUrl: './document.html'
 })
 export class DocumentComponent implements OnInit {
 
   showAddPopup = false;
   selectedFile!: File;
-  successMessage = '';
-  showSuccess = false;
+
 
   documentForm = {
     portfolioTypeId: 1,
     clientId: 1,
     trackingNumber: '0007933261001753412',
-      remark: ''
+    remark: ''
   };
 
   documentList: any[] = [];
 
-  constructor(private myService: MyService, @Inject(PLATFORM_ID) private platformId: Object, private cdr: ChangeDetectorRef, private location: Location,
-    private router: Router) { }
+  constructor(private myService: MyService, @Inject(PLATFORM_ID) private platformId: Object, private cdr: ChangeDetectorRef, private location: Location,private router: Router, private messageService: MessageService) { }
 
   ngOnInit(): void {
     this.loadDocuments();   // 👈 LIST ON PAGE LOAD
@@ -37,6 +37,7 @@ export class DocumentComponent implements OnInit {
 
   openAddPopup() {
     this.showAddPopup = true;
+     this.documentForm.remark = '';
   }
 
   closeAddPopup() {
@@ -59,12 +60,12 @@ export class DocumentComponent implements OnInit {
       .addCustomerOtherDocument(this.documentForm, this.selectedFile)
       .subscribe({
         next: () => {
-
-
           // ✅ reload list — NEW FILE APPEARS
-          this.showSuccessMessage('Department Added successfully!');
+          this.messageService.show('Department Added successfully!');
           this.loadDocuments();
-            this.closeAddPopup();
+          this.closeAddPopup();
+          this.documentForm.remark = '';
+          this.selectedFile = undefined as any;
         },
         error: () => alert('Upload failed')
       });
@@ -113,18 +114,10 @@ export class DocumentComponent implements OnInit {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    this.showSuccessMessage('Department Download successfully!');
+    this.messageService.show('Department Download successfully!');
   }
 
-  private showSuccessMessage(message: string) {
-    this.successMessage = message;
-    this.showSuccess = true;
 
-    setTimeout(() => {
-      this.showSuccess = false;
-      this.successMessage = '';
-    }, 500); // auto-hide after 3 sec
-  }
 
   goBack() {
     if (window.history.length > 1) {

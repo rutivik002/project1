@@ -6,6 +6,7 @@ import { Department } from './models/department.model';
 import { City } from './models/city.model';
 import { ApiResponse } from './models/api-responce.model';
 
+
 @Injectable({
   providedIn: 'root',
 }) export class MyService {
@@ -155,9 +156,7 @@ import { ApiResponse } from './models/api-responce.model';
     });
 
     return this.http.post(
-      `${this.documentbaseUrl}/addCustomerOtherDocument`,
-      formData,
-      { headers } // ✅ Use correct headers
+      `${this.documentbaseUrl}/addCustomerOtherDocument`,formData, { headers } // ✅ Use correct headers
     );
   }
 
